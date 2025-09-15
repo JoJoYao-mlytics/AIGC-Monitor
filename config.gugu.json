@@ -1,0 +1,118 @@
+{
+  "baseUrl": "https://www.gugu.fund/",
+  "timeouts": {
+    "pageLoad": 60000,
+    "findNews": 15000,
+    "findAiSection": 10000,
+    "findQuestion": 10000,
+    "closeAds": 3000,
+    "aiInitialWait": 5000,
+    "aiContentWait": 60000,
+    "aigcScriptWait": 30000,
+    "aigcApiWait": 30000,
+    "networkWait": 5000
+  },
+  "keywords": {
+    "ai": [
+      "你可能也想知道",
+      "你可能也想知道...",
+      "AIGC",
+      "AI來解答",
+      "AI解答",
+      "智能問答",
+      "Powered by Mlytics AI",
+      "Answer / Powered by Mlytics AI"
+    ]
+  },
+  "selectors": {
+    "newsSection": [
+      "text=最新發燒文章",
+      ".hot-articles",
+      ".news-section"
+    ],
+    "newsLinks": [
+      "link[href*='/blog/invest-news/']:first-of-type",
+      "link[href*='/blog/concept-stocks/']:first-of-type", 
+      "link[href*='/blog/']:first-of-type",
+      "a[href*='/blog/invest-news/']:first-of-type",
+      "a[href*='/blog/concept-stocks/']:first-of-type",
+      "a[href*='/blog/']:first-of-type"
+    ],
+    "aiSection": [
+      "h2:has-text('你可能也想知道')",
+      "h2:has-text('你可能也想知道...')",
+      "heading:has-text('你可能也想知道')",
+      "heading:has-text('你可能也想知道...')",
+      "[data-testid*='aigc']",
+      ".ai-qa-section"
+    ],
+    "aiQuestions": [
+      "h2:has-text('你可能也想知道') ~ * a[href*='/ai/answer']:first-of-type",
+      "h2:has-text('你可能也想知道...') ~ * a[href*='/ai/answer']:first-of-type",
+      "heading:has-text('你可能也想知道') ~ * a[href*='/ai/answer']:first-of-type",
+      "heading:has-text('你可能也想知道...') ~ * a[href*='/ai/answer']:first-of-type",
+      "a[href*='/ai/answer']:first-of-type"
+    ],
+    "loadingTexts": [
+      "text=解讀中",
+      "text=載入中",
+      "text=生成中",
+      "text=Loading",
+      "h5:has-text('解讀中')"
+    ],
+    "aiContent": [
+      "h1:has-text('月份亞洲製造業PMI')",
+      "h3:has-text('亞洲8月製造業PMI')",
+      "text=Powered by Mlytics AI",
+      ".ai-answer-content"
+    ]
+  },
+  "apiEndpoints": {
+    "questions_html": "https://api.aigc.mlytics.com/api/questions_html",
+    "answer_html": "https://api.aigc.mlytics.com/api/answer_html",
+    "aigc_app_js": "https://school.gugu.fund/ai/js/db_answer.min.js",
+    "aigc_css": "https://school.gugu.fund/ai/css/aigc-answer.css",
+    "questions_ajax": "https://api.aigc.mlytics.com/api/questions_ajax",
+    "tracker": "https://api.aigc.mlytics.com/tracker",
+    "member_html": "https://api.aigc.mlytics.com/api/member_html",
+    "metadata_html": "https://api.aigc.mlytics.com/api/metadata_html"
+  },
+  "expectedConsoleMessages": [
+    "AIGC 腳本加載完成",
+    "🚀 Powered by Mlytics AI",
+    "👉 Learn more or get a demo: https://www.mlytics.com/lp/get-a-demo/"
+  ],
+  "profiles": {
+    "gugu": {
+      "name": "股股知識庫",
+      "baseUrl": "https://www.gugu.fund/",
+      "articleUrl": "https://school.gugu.fund/blog/invest-news/5288080656",
+      "keywords": {
+        "ai": [
+          "你可能也想知道",
+          "你可能也想知道...",
+          "AIGC",
+          "Powered by Mlytics AI"
+        ]
+      },
+      "selectors": {
+        "newsLinks": [
+          "link[href*='/blog/']:first-of-type",
+          "a[href*='/blog/']:first-of-type"
+        ],
+        "aiSection": [
+          "h2:has-text('你可能也想知道')",
+          "heading:has-text('你可能也想知道')"
+        ],
+        "aiQuestions": [
+          "a[href*='/ai/answer']:first-of-type"
+        ]
+      },
+      "apiEndpoints": {
+        "aigc_app_js": "https://school.gugu.fund/ai/js/db_answer.min.js",
+        "aigc_css": "https://school.gugu.fund/ai/css/aigc-answer.css",
+        "tracker": "https://api.aigc.mlytics.com/tracker"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "aigc-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AIGC functionality monitoring across multiple sites via Playwright",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "monitor": "node src/monitor.js",
+    "monitor:gugu": "SITE_ID=gugu BASE_URL=https://www.gugu.fund/ node src/monitor.js",
+    "monitor:gugu-article": "SITE_ID=gugu BASE_URL=https://school.gugu.fund/blog/invest-news/5288080656 node src/monitor.js",
+    "monitor:gugu-config": "SITE_ID=gugu node src/monitor.js --config=config.gugu.json",
+    "monitor:cmoney": "SITE_ID=cmoney BASE_URL=https://www.cmoney.tw/index.html node src/monitor.js",
+    "monitor:cmoney-config": "SITE_ID=cmoney node src/monitor.js --config=config.cmoney.json",
+    "example:gugu": "node example.js",
+    "example:cmoney": "node example-cmoney.js",
+    "start": "node src/monitor.js",
+    "test": "playwright test --reporter=html",
+    "test:gugu": "playwright test tests/gugu.spec.js --reporter=html",
+    "test:cmoney": "playwright test tests/cmoney.spec.js --reporter=html",
+    "test:all": "playwright test --reporter=html",
+    "show-report": "playwright show-report",
+    "setup": "npm install && npx playwright install chromium"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "moment": "^2.30.1",
+    "playwright": "^1.46.0",
+    "@playwright/test": "^1.46.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "keywords": [
+    "aigc",
+    "monitoring",
+    "playwright",
+    "automation",
+    "testing"
+  ],
+  "author": "BMad Team",
+  "license": "MIT"
+}

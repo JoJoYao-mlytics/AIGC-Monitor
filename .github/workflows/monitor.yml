@@ -1,0 +1,141 @@
+name: BNext AIGC Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'   # 每日 08:00 (Asia/Taipei) -> 00:00 UTC
+    - cron: '0 9 * * *'   # 每日 17:00 (Asia/Taipei) -> 09:00 UTC
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'playwright.config.js'
+      - 'package.json'
+      - '.github/workflows/monitor.yml'
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      DEBUG: 'false'
+      CI: 'true'
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    strategy:
+      fail-fast: false
+      matrix:
+        site: [gugu, cmoney]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          corepack enable || true
+          npm ci || npm i
+          npx playwright install --with-deps chromium
+
+      - name: Run monitor (node script)
+        id: run_script
+        continue-on-error: true
+        run: |
+          SITE_ID=${{ matrix.site }} node src/monitor.js || true
+
+      - name: Run Playwright Test for HTML report
+        id: run_pw
+        continue-on-error: true
+        run: |
+          npx playwright test --reporter=html || true
+
+      - name: Collect status
+        id: status
+        run: |
+          DATE_DIR=$(ls -1 reports/${{ matrix.site }} 2>/dev/null | tail -n 1 || echo "")
+          echo "date_dir=$DATE_DIR" >> $GITHUB_OUTPUT
+          RESULTS_FILE=$(ls -1 reports/${{ matrix.site }}/$DATE_DIR/results/*-results.json 2>/dev/null | tail -n 1 || echo "")
+          echo "results_file=$RESULTS_FILE" >> $GITHUB_OUTPUT
+          STATUS=$(node -e "try{const f=process.env.FILE;if(!f)throw 0;const d=require('fs').readFileSync(f,'utf8');const j=JSON.parse(d);console.log(j.status||'failed');}catch(e){console.log('failed');}" FILE="$RESULTS_FILE")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts (reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.site }}-aigc-reports-${{ steps.status.outputs.date_dir }}-${{ github.run_attempt }}
+          path: |
+            reports/${{ matrix.site }}/**
+            screenshots/${{ matrix.site }}/**
+            playwright-report/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload Pages artifact (Playwright HTML report)
+        if: always() && matrix.site == 'bnext'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report
+
+      - name: Deploy to GitHub Pages
+        if: always() && matrix.site == 'bnext'
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Add report link to summary
+        if: always() && matrix.site == 'bnext'
+        run: |
+          echo "Playwright HTML Report: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify Slack on issue (failed only)
+        if: ${{ steps.status.outputs.status == 'failed' }}
+        env:
+          STATUS: ${{ steps.status.outputs.status }}
+          DATE_DIR: ${{ steps.status.outputs.date_dir }}
+          SITE: ${{ matrix.site }}
+          # Optional per-site webhooks: SLACK_WEBHOOK_URL__BNEXT / SLACK_WEBHOOK_URL__CMONEY
+          SLACK_WEBHOOK_URL__BNEXT: ${{ secrets.SLACK_WEBHOOK_URL__BNEXT }}
+          SLACK_WEBHOOK_URL__CMONEY: ${{ secrets.SLACK_WEBHOOK_URL__CMONEY }}
+        run: |
+          WEBHOOK="$SLACK_WEBHOOK_URL"
+          if [ "$SITE" = "bnext" ] && [ -n "$SLACK_WEBHOOK_URL__BNEXT" ]; then WEBHOOK="$SLACK_WEBHOOK_URL__BNEXT"; fi
+          if [ "$SITE" = "cmoney" ] && [ -n "$SLACK_WEBHOOK_URL__CMONEY" ]; then WEBHOOK="$SLACK_WEBHOOK_URL__CMONEY"; fi
+          if [ -z "$WEBHOOK" ]; then echo "No Slack webhook configured"; exit 0; fi
+          SUMMARY_FILE="${{ steps.status.outputs.results_file }}"
+          SUMMARY_JSON=$(cat "$SUMMARY_FILE" 2>/dev/null || echo '{}')
+          SHORT_MSG=$(echo "$SUMMARY_JSON" | node -e "let s='';try{const d=JSON.parse(require('fs').readFileSync(0,'utf8'));s=(d.results?Object.entries(d.results).filter(([k,v])=>v).length+'/'+Object.keys(d.results).length+' checks passed':'')+' '+(d.errors?.length||0)+' errors';}catch(e){s=''}console.log(s.trim())")
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          PAYLOAD=$(jq -n \
+            --arg status "$STATUS" \
+            --arg date "$DATE_DIR" \
+            --arg msg "$SHORT_MSG" \
+            --arg run_url "$RUN_URL" \
+            --arg site "$SITE" \
+            '{
+              text: ("AIGC Monitor [" + $site + "]: " + $status),
+              attachments: [
+                {
+                  color: (if $status == "success" then "good" else "danger" end),
+                  title: ("Reports " + $site + " - " + $date),
+                  title_link: $run_url,
+                  text: $msg
+                }
+              ]
+            }')
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$WEBHOOK" || true
