@@ -59,7 +59,8 @@ jobs:
         run: |
           SITE_ID=${{ matrix.site }} node src/monitor.js || true
 
-      - name: Run Playwright Test for HTML report
+      - name: Run Playwright Test for HTML report (skipped for gugu/cmoney to avoid duplicate runs)
+        if: ${{ false }}
         id: run_pw
         continue-on-error: true
         run: |
