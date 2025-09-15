@@ -34,6 +34,7 @@ jobs:
       DEBUG: 'false'
       CI: 'true'
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
     strategy:
       fail-fast: false
       matrix:
@@ -41,17 +42,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
 
-      - name: Install dependencies
+      - name: Install npm dependencies
         run: |
-          corepack enable || true
-          npm ci || npm i
-          npx playwright install --with-deps chromium
+          npm ci --no-audit --no-fund || npm i --no-audit --no-fund
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-ms-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-ms-playwright-
+
+      - name: Setup Playwright (chromium)
+        uses: microsoft/playwright-github-action@v1
+        with:
+          browsers: 'chromium'
 
       - name: Run monitor (node script)
         id: run_script
