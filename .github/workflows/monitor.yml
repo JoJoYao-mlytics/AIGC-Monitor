@@ -56,18 +56,9 @@ jobs:
         run: |
           npm ci --no-audit --no-fund || npm i --no-audit --no-fund
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-ms-playwright-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ms-playwright-
-
-      - name: Setup Playwright (chromium)
-        uses: microsoft/playwright-github-action@v1
-        with:
-          browsers: 'chromium'
+      - name: Install Playwright browsers with OS deps (chromium)
+        run: |
+          npx playwright install --with-deps chromium
 
       - name: Run monitor (node script)
         id: run_script
