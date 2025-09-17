@@ -1,0 +1,58 @@
+{
+  "baseUrl": "https://www.bnext.com.tw/articles",
+  "timeouts": {
+    "pageLoad": 60000,
+    "findNews": 45000,
+    "findAiSection": 20000,
+    "findQuestion": 20000,
+    "closeAds": 5000,
+    "aiInitialWait": 5000,
+    "aiContentWait": 60000,
+    "aigcScriptWait": 30000,
+    "aigcApiWait": 30000,
+    "networkWait": 5000
+  },
+  "clearOnStart": false,
+  "keywords": {
+    "ai": [
+      "你想知道哪些？AI來解答",
+      "AIGC",
+      "Powered by Mlytics AI"
+    ]
+  },
+  "selectors": {
+    "newsLinks": [
+      "a[href*='/article/']",
+      "a:has(h2)",
+      "section a[href*='/article/']",
+      "h2 a[href*='/article/']",
+      "a[href*='/articles/']"
+    ],
+    "aiSection": [
+      "h2:has-text('你想知道哪些？AI來解答')",
+      "text=你想知道哪些？AI來解答"
+    ],
+    "aiQuestions": [
+      "a[href*='/answer/']",
+      "a[href*='ai.bnext.com.tw/answer']"
+    ],
+    "aiContent": [
+      "text=Powered by Mlytics AI",
+      "[data-testid='ai-content']"
+    ]
+  },
+  "apiEndpoints": {
+    "metadata_html": "https://api.aigc.mlytics.com/api/metadata_html",
+    "answer_html": "https://api.aigc.mlytics.com/api/answer_html",
+    "questions_html": "https://api.aigc.mlytics.com/api/questions_html",
+    "member_html": "https://api.aigc.mlytics.com/api/member_html",
+    "questions_ajax": "https://api.aigc.mlytics.com/api/questions_ajax",
+    "tracker": "https://api.aigc.mlytics.com/tracker"
+  },
+  "expectedConsoleMessages": [
+    "AIGC 腳本加載完成",
+    "Powered by Mlytics AI"
+  ]
+}
+
+

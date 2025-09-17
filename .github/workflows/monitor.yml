@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        site: [gugu, cmoney]
+        site: [gugu, cmoney, bnext]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,6 +63,8 @@ jobs:
       - name: Run monitor (node script)
         id: run_script
         continue-on-error: true
+        env:
+          CLEAR_ON_START: ${{ matrix.site == 'bnext' && 'true' || 'false' }}
         run: |
           SITE_ID=${{ matrix.site }} node src/monitor.js || true
 
