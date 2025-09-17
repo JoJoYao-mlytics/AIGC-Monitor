@@ -97,6 +97,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Setup Pages
+        if: always() && matrix.site == 'bnext'
+        uses: actions/configure-pages@v5
+
       - name: Upload Pages artifact (BNEXT report)
         if: always() && matrix.site == 'bnext'
         uses: actions/upload-pages-artifact@v3
