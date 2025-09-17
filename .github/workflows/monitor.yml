@@ -25,11 +25,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     env:
       DEBUG: 'false'
       CI: 'true'
@@ -97,25 +92,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: Setup Pages
-        if: always() && matrix.site == 'bnext'
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact (BNEXT report)
-        if: always() && matrix.site == 'bnext'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: reports/bnext/${{ steps.status.outputs.date_dir }}/results
-
-      - name: Deploy to GitHub Pages
-        if: always() && matrix.site == 'bnext'
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Add report link to summary
-        if: always() && matrix.site == 'bnext'
-        run: |
-          echo "Playwright HTML Report: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Notify Slack on issue (failed only)
         if: ${{ steps.status.outputs.status == 'failed' }}
