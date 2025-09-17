@@ -97,11 +97,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: Upload Pages artifact (Playwright HTML report)
+      - name: Upload Pages artifact (BNEXT report)
         if: always() && matrix.site == 'bnext'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: playwright-report
+          path: reports/bnext/${{ steps.status.outputs.date_dir }}/results
 
       - name: Deploy to GitHub Pages
         if: always() && matrix.site == 'bnext'
