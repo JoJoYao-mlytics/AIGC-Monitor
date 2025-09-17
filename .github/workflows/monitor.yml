@@ -25,11 +25,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     env:
       DEBUG: 'false'
       CI: 'true'
@@ -38,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        site: [gugu, cmoney]
+        site: [gugu, cmoney, bnext]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,6 +58,8 @@ jobs:
       - name: Run monitor (node script)
         id: run_script
         continue-on-error: true
+        env:
+          CLEAR_ON_START: ${{ matrix.site == 'bnext' && 'true' || 'false' }}
         run: |
           SITE_ID=${{ matrix.site }} node src/monitor.js || true
 
@@ -95,21 +92,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: Upload Pages artifact (Playwright HTML report)
-        if: always() && matrix.site == 'bnext'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: playwright-report
-
-      - name: Deploy to GitHub Pages
-        if: always() && matrix.site == 'bnext'
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Add report link to summary
-        if: always() && matrix.site == 'bnext'
-        run: |
-          echo "Playwright HTML Report: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Notify Slack on issue (failed only)
         if: ${{ steps.status.outputs.status == 'failed' }}
