@@ -1,4 +1,4 @@
-name: BNext AIGC Monitor
+name: Multi-Site AIGC Monitor
 
 on:
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        site: [gugu, cmoney, bnext]
+        site: [gugu, cmoney, bnext, cnyes]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -99,13 +99,15 @@ jobs:
           STATUS: ${{ steps.status.outputs.status }}
           DATE_DIR: ${{ steps.status.outputs.date_dir }}
           SITE: ${{ matrix.site }}
-          # Optional per-site webhooks: SLACK_WEBHOOK_URL__BNEXT / SLACK_WEBHOOK_URL__CMONEY
+          # Optional per-site webhooks: SLACK_WEBHOOK_URL__BNEXT / SLACK_WEBHOOK_URL__CMONEY / SLACK_WEBHOOK_URL__CNYES
           SLACK_WEBHOOK_URL__BNEXT: ${{ secrets.SLACK_WEBHOOK_URL__BNEXT }}
           SLACK_WEBHOOK_URL__CMONEY: ${{ secrets.SLACK_WEBHOOK_URL__CMONEY }}
+          SLACK_WEBHOOK_URL__CNYES: ${{ secrets.SLACK_WEBHOOK_URL__CNYES }}
         run: |
           WEBHOOK="$SLACK_WEBHOOK_URL"
           if [ "$SITE" = "bnext" ] && [ -n "$SLACK_WEBHOOK_URL__BNEXT" ]; then WEBHOOK="$SLACK_WEBHOOK_URL__BNEXT"; fi
           if [ "$SITE" = "cmoney" ] && [ -n "$SLACK_WEBHOOK_URL__CMONEY" ]; then WEBHOOK="$SLACK_WEBHOOK_URL__CMONEY"; fi
+          if [ "$SITE" = "cnyes" ] && [ -n "$SLACK_WEBHOOK_URL__CNYES" ]; then WEBHOOK="$SLACK_WEBHOOK_URL__CNYES"; fi
           if [ -z "$WEBHOOK" ]; then echo "No Slack webhook configured"; exit 0; fi
           SUMMARY_FILE="${{ steps.status.outputs.results_file }}"
           SUMMARY_JSON=$(cat "$SUMMARY_FILE" 2>/dev/null || echo '{}')
