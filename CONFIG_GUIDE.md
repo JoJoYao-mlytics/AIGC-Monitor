@@ -168,6 +168,60 @@
 }
 ```
 
+### 8. BNEXT 配置（示例）
+
+```json
+{
+  "baseUrl": "https://www.bnext.com.tw/articles",
+  "clearOnStart": false,
+  "timeouts": {
+    "pageLoad": 60000,
+    "findNews": 45000,
+    "findAiSection": 20000,
+    "findQuestion": 20000,
+    "aiInitialWait": 5000,
+    "aiContentWait": 60000
+  },
+  "keywords": {
+    "ai": ["你想知道哪些？AI來解答", "AIGC", "Powered by Mlytics AI"]
+  },
+  "selectors": {
+    "newsLinks": [
+      "a[href*='/article/']",
+      "a:has(h2)",
+      "section a[href*='/article/']",
+      "h2 a[href*='/article/']",
+      "a[href*='/articles/']"
+    ],
+    "aiSection": [
+      "h2:has-text('你想知道哪些？AI來解答')",
+      "text=你想知道哪些？AI來解答"
+    ],
+    "aiQuestions": [
+      "a[href*='/answer/']",
+      "a[href*='ai.bnext.com.tw/answer']"
+    ],
+    "aiContent": [
+      "text=Powered by Mlytics AI",
+      "[data-testid='ai-content']"
+    ]
+  },
+  "apiEndpoints": {
+    "metadata_html": "https://api.aigc.mlytics.com/api/metadata_html",
+    "answer_html": "https://api.aigc.mlytics.com/api/answer_html",
+    "questions_html": "https://api.aigc.mlytics.com/api/questions_html",
+    "member_html": "https://api.aigc.mlytics.com/api/member_html",
+    "questions_ajax": "https://api.aigc.mlytics.com/api/questions_ajax",
+    "tracker": "https://api.aigc.mlytics.com/tracker"
+  }
+}
+```
+
+BNEXT 注意事項：
+- 有彈窗時會在 30 秒內嘗試關閉 `#custom-popup-close`。
+- 若需強制乾淨狀態，在 CI 或本機設定 `CLEAR_ON_START=true`。
+- 列表導頁優先使用 `href → page.goto()` 避免點擊攔截。
+
 ### 6. 預期 Console 訊息 (expectedConsoleMessages)
 
 ```json

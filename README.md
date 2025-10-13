@@ -5,7 +5,7 @@
 ## 功能特色
 
 - 🔍 **全面監控**: 檢查 AIGC 功能的各個環節
-- 🌐 **多站點支援**: 支援 GUGU、CMoney 等多個網站監控
+- 🌐 **多站點支援**: 支援 GUGU、CMoney、BNext、CNYES (鉅亨網) 等多個網站監控
 - 📊 **詳細報告**: 生成 HTML、JSON 和文字格式的詳細報告
 - 🚀 **自動化執行**: 可集成到 CI/CD 流程中
 - 📸 **截圖記錄**: 自動截圖記錄關鍵步驟
@@ -68,16 +68,24 @@ npm run monitor:gugu
 # 監控 CMoney 站點
 npm run monitor:cmoney
 
+# 監控 BNext 站點
+npm run monitor:bnext
+
+# 監控 CNYES (鉅亨網) 站點
+npm run monitor:cnyes
+
 # 監控特定文章頁面
 npm run monitor:gugu-article
 
 # 使用配置文件
 npm run monitor:gugu-config
 npm run monitor:cmoney-config
+npm run monitor:cnyes-config
 
 # 執行示例腳本
 npm run example:gugu
 npm run example:cmoney
+npm run example:cnyes
 ```
 
 ### 環境變數
@@ -87,11 +95,15 @@ npm run example:cmoney
 export SITE_ID=gugu
 # 或者
 export SITE_ID=cmoney
+# 或者
+export SITE_ID=cnyes
 
 # 設置基礎 URL
 export BASE_URL=https://www.gugu.fund/
 # 或者
 export BASE_URL=https://www.cmoney.tw/index.html
+# 或者
+export BASE_URL=https://www.cnyes.com/
 
 # 啟用調試模式
 export DEBUG=true
@@ -109,6 +121,8 @@ npm test
 # 執行特定站點測試
 npm run test:gugu
 npm run test:cmoney
+npm run test:bnext
+npm run test:cnyes
 
 # 顯示測試報告
 npm run show-report
@@ -197,6 +211,57 @@ npm run show-report
 }
 ```
 
+#### CNYES (鉅亨網) 站點配置 (`config.cnyes.json`)
+
+```json
+{
+  "baseUrl": "https://www.cnyes.com/",
+  "timeouts": {
+    "pageLoad": 60000,
+    "findNews": 30000,
+    "findAiSection": 20000,
+    "aiContentWait": 60000
+  },
+  "keywords": {
+    "ai": [
+      "想知道更多? AI來回答",
+      "AI來回答",
+      "AIGC",
+      "Powered by Mlytics AI"
+    ]
+  },
+  "selectors": {
+    "newsLinks": [
+      "a[href*='/news/id/']:first-of-type"
+    ],
+    "aiSection": [
+      "h2:has-text('想知道更多? AI來回答')"
+    ],
+    "aiQuestions": [
+      "a[href*='/aigc/answer']:first-of-type"
+    ]
+  },
+  "apiEndpoints": {
+    "metadata_html": "https://api.aigc.mlytics.com/api/metadata_html",
+    "answer_html": "https://api.aigc.mlytics.com/api/answer_html",
+    "questions_html": "https://api.aigc.mlytics.com/api/questions_html",
+    "member_html": "https://api.aigc.mlytics.com/api/member_html",
+    "questions_ajax": "https://api.aigc.mlytics.com/api/questions_ajax"
+  }
+}
+```
+
+#### CNYES 測試流程
+1. 開啟 `https://www.cnyes.com/` 首頁
+2. 找到『頭條區塊』並點擊任意文章連結
+3. 確認開啟的文章頁面的 title 與剛剛點擊的連結相符
+4. 確認文章頁面中下方有『想知道更多? AI來回答』的區塊與內容
+5. 點擊『想知道更多? AI來回答』中任意連結（會開啟新頁面）
+6. 確認 AI 回答頁面 title 與剛剛點擊的相符
+7. 確認內容有正確載入（等待載入指示器消失）
+8. 確認 Answer 頁面中間有『資料來源』的區塊與內容
+9. 確認 Answer 頁面中下方有『想知道更多? AI來回答』的區塊與內容
+
 ## 報告格式
 
 ### 輸出目錄結構
@@ -222,6 +287,18 @@ reports/
 │           ├── 2025-01-15-11-00-00-results.json
 │           ├── 2025-01-15-11-00-00-report.html
 │           └── 2025-01-15-11-00-00-summary.txt
+└── cnyes/
+    └── 2025-01-15/
+        ├── screenshots/
+        │   ├── 2025-01-15-14-00-00-website-loaded.png
+        │   ├── 2025-01-15-14-00-15-article-loaded.png
+        │   ├── 2025-01-15-14-00-30-ai-section-found.png
+        │   ├── 2025-01-15-14-00-45-ai-answer-page.png
+        │   └── 2025-01-15-14-01-00-ai-content-generated.png
+        └── results/
+            ├── 2025-01-15-14-00-00-results.json
+            ├── 2025-01-15-14-00-00-report.html
+            └── 2025-01-15-14-00-00-summary.txt
 ```
 
 ### 報告內容
@@ -234,9 +311,36 @@ reports/
 ### 目前支援
 - ✅ **GUGU** (`gugu`): 股股知識庫 - https://www.gugu.fund/
 - ✅ **CMoney** (`cmoney`): CMoney 投資網誌 - https://www.cmoney.tw/
+- ✅ **BNext** (`bnext`): 數位時代 - https://www.bnext.com.tw/
+- ✅ **CNYES** (`cnyes`): 鉅亨網 - https://www.cnyes.com/
 
-### 計劃支援
-- 🔄 **BNext** (`bnext`): 數位時代
+#### BNext 注意事項
+- 首頁可能在 30 秒內顯示彈窗，會自動等待並嘗試關閉 `#custom-popup-close`。
+- 可用 `CLEAR_ON_START=true` 於 CI 或本機啟動時清空 cookie/localStorage（避免彈窗狀態干擾）。
+- 列表導頁優先以 `href → page.goto()`，避免 click 被攔截；`newsLinks` 選擇器採用寬鬆匹配。
+- 相關設定於 `config.bnext.json`。
+
+範例（節選）：
+
+```json
+{
+  "baseUrl": "https://www.bnext.com.tw/articles",
+  "timeouts": { "findNews": 45000 },
+  "selectors": {
+    "newsLinks": [
+      "a[href*='/article/']",
+      "a:has(h2)",
+      "section a[href*='/article/']",
+      "h2 a[href*='/article/']",
+      "a[href*='/articles/']"
+    ],
+    "aiSection": [
+      "h2:has-text('你想知道哪些？AI來解答')",
+      "text=你想知道哪些？AI來解答"
+    ]
+  }
+}
+```
 
 ## 開發指南
 

@@ -8,6 +8,7 @@ const { ensureDirectories, takeScreenshot, progressiveScroll, logPageStructure }
 const { checkGuguAIGCFunctionality } = require('./gugu-aigc');
 const { checkCMoneyAIGCFunctionality } = require('./cmoney-aigc');
 const { checkBnextAIGCFunctionality, preflightBnext } = require('./bnext-aigc');
+const { checkCnyesAIGCFunctionality } = require('./cnyes-aigc');
 const { saveResults } = require('./reporter');
 
 class AIGCMonitor {
@@ -98,6 +99,8 @@ class AIGCMonitor {
                 await checkCMoneyAIGCFunctionality(page, context, this.results, config, this.dateFolder, this.timestamp);
             } else if (siteId === 'bnext') {
                 await checkBnextAIGCFunctionality(page, context, this.results, config, this.dateFolder, this.timestamp);
+            } else if (siteId === 'cnyes') {
+                await checkCnyesAIGCFunctionality(page, context, this.results, config, this.dateFolder, this.timestamp);
             } else {
                 throw new Error(`不支援的站點: ${siteId}`);
             }
@@ -178,7 +181,7 @@ class AIGCMonitor {
         console.log('📍 導航到文章頁面...');
         try {
             const currentUrl = page.url();
-            if (currentUrl.includes('/blog/') || currentUrl.includes('/article/')) {
+            if (currentUrl.includes('/blog/') || currentUrl.includes('/article/') || currentUrl.includes('/news/id/')) {
                 console.log('✅ 已在文章頁面');
                 this.results.results.news_article_loaded = true;
                 await progressiveScroll(page, 3);
