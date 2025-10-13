@@ -417,15 +417,6 @@ DEBUG=true npm test
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 開啟 Pull Request
 
-## 授權
-
-MIT License - 詳見 [LICENSE](LICENSE) 文件
-
-## 聯絡資訊
-
-- 專案維護者: BMad Team
-- 問題回報: [GitHub Issues](https://github.com/your-org/AIGC-Monitor/issues)
-
 ---
 
 **注意**: 此工具僅用於監控和測試目的，請遵守目標網站的使用條款和 robots.txt 規則。
