@@ -1,0 +1,98 @@
+{
+  "baseUrl": "https://www.cnyes.com/",
+  "clearOnStart": false,
+  "timeouts": {
+    "pageLoad": 60000,
+    "findNews": 30000,
+    "findAiSection": 20000,
+    "findQuestion": 20000,
+    "closeAds": 5000,
+    "aiInitialWait": 5000,
+    "aiContentWait": 60000,
+    "aigcScriptWait": 30000,
+    "aigcApiWait": 30000,
+    "networkWait": 5000
+  },
+  "keywords": {
+    "ai": [
+      "想知道更多? AI來回答",
+      "想知道更多？AI來回答",
+      "AI來回答",
+      "AIGC",
+      "Powered by Mlytics AI",
+      "Answer / Powered by Mlytics AI"
+    ],
+    "dataSource": [
+      "資料來源",
+      "数据来源",
+      "data source"
+    ]
+  },
+  "selectors": {
+    "newsSection": [
+      "text=頭條",
+      ".headline-section",
+      "[data-testid='headline']"
+    ],
+    "newsLinks": [
+      "a[href*='/news/id/']:first-of-type",
+      "a[href*='/news/']:first-of-type",
+      ".news-item a:first-of-type",
+      "article a[href*='/news/']:first-of-type"
+    ],
+    "aiSection": [
+      "h2:has-text('想知道更多? AI來回答')",
+      "h2:has-text('想知道更多？AI來回答')",
+      "heading:has-text('想知道更多')",
+      "text=想知道更多? AI來回答",
+      "text=想知道更多？AI來回答"
+    ],
+    "aiQuestions": [
+      "h2:has-text('想知道更多') ~ * a[href*='/aigc/answer']:first-of-type",
+      "a[href*='/aigc/answer']:first-of-type",
+      "a[href*='news.cnyes.com/news/aigc/answer']:first-of-type"
+    ],
+    "loadingTexts": [
+      "text=載入中",
+      "text=解讀中",
+      "text=生成中",
+      "text=Loading"
+    ],
+    "aiContent": [
+      "text=Powered by Mlytics AI",
+      "text=Answer / Powered by Mlytics AI",
+      "[data-testid='ai-content']",
+      "iframe[src*='aigc']"
+    ],
+    "dataSourceSection": [
+      "h5:has-text('資料來源')",
+      "heading:has-text('資料來源')",
+      "text=資料來源",
+      ".data-source-section"
+    ],
+    "aiSectionBottom": [
+      "h3:has-text('想知道更多? AI來回答')",
+      "h3:has-text('想知道更多？AI來回答')",
+      "heading:has-text('想知道更多')"
+    ]
+  },
+  "apiEndpoints": {
+    "metadata_html": "https://api.aigc.mlytics.com/api/metadata_html",
+    "answer_html": "https://api.aigc.mlytics.com/api/answer_html",
+    "questions_html": "https://api.aigc.mlytics.com/api/questions_html",
+    "member_html": "https://api.aigc.mlytics.com/api/member_html",
+    "questions_ajax": "https://api.aigc.mlytics.com/api/questions_ajax",
+    "tracker": "https://api.aigc.mlytics.com/tracker"
+  },
+  "expectedConsoleMessages": [
+    "Powered by Mlytics AI"
+  ],
+  "profiles": {
+    "cnyes": {
+      "name": "鉅亨網",
+      "baseUrl": "https://www.cnyes.com/",
+      "description": "鉅亨網 - 台灣最大財經資訊網站"
+    }
+  }
+}
+
