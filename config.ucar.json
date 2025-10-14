@@ -1,0 +1,58 @@
+{
+  "baseUrl": "https://roadtest.u-car.com.tw/roadtest/articles",
+  "timeouts": {
+    "pageLoad": 60000,
+    "findNews": 30000,
+    "findAiSection": 20000,
+    "aiContentWait": 60000
+  },
+  "keywords": {
+    "ai": [
+      "你想知道哪些？AI來解答",
+      "AI來解答",
+      "AIGC",
+      "Powered by Mlytics AI"
+    ]
+  },
+  "selectors": {
+    "newsLinks": [
+      "a[href*='/roadtest/article/']",
+      ".article-list a[href*='/article/']",
+      "h3 a[href*='/roadtest/article/']"
+    ],
+    "aiSection": [
+      "h2:has-text('你想知道哪些？AI來解答')",
+      "text=你想知道哪些？AI來解答"
+    ],
+    "aiQuestions": [
+      "a[href*='aigc.u-car.com.tw/answer']",
+      "a[href*='/answer?t=']"
+    ],
+    "aiAnswerTitle": [
+      "h1",
+      "heading[level='1']"
+    ],
+    "aiAnswerContent": [
+      "h5:has-text('Answer')",
+      "h5:has-text('Powered by Mlytics AI')",
+      "h3",
+      "heading[level='3']"
+    ],
+    "dataSource": [
+      "h5:has-text('資料來源')",
+      "text=資料來源"
+    ]
+  },
+  "apiEndpoints": {
+    "aigc_app_js": "https://api.aigc.mlytics.com/js/aigc_app.min.js",
+    "tracker": "https://api.aigc.mlytics.com/tracker",
+    "member_html": "https://api.aigc.mlytics.com/api/member_html",
+    "questions_html": "https://api.aigc.mlytics.com/api/questions_html",
+    "answer_html": "https://api.aigc.mlytics.com/api/answer_html"
+  },
+  "expectedConsoleMessages": [
+    "✅ AIGC widget 網域匹配",
+    "✅ AIGC 腳本加載完成"
+  ]
+}
+
