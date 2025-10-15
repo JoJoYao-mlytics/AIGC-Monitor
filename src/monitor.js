@@ -113,6 +113,7 @@ class AIGCMonitor {
 
             this.results.performance.total_duration = Date.now() - this.startTime;
             this.calculateApiStats();
+            this.updateFinalStatus();
             await saveResults(this.results, this.dateFolder, this.timestamp, siteId);
 
             console.log('✅ 監控執行完成');
@@ -268,6 +269,46 @@ class AIGCMonitor {
             }
         } catch (error) {
             console.warn('⚠️ 計算 API 統計失敗:', error.message);
+        }
+    }
+
+    updateFinalStatus() {
+        try {
+            // 根據檢查結果自動更新 status
+            // 定義關鍵檢查項目（必須全部通過才算成功）
+            const criticalChecks = [
+                this.results.results.website_accessible,
+                this.results.results.news_article_loaded,
+                this.results.results.ai_section_found
+            ];
+
+            // 定義次要檢查項目（影響成功率但不一定導致失敗）
+            const secondaryChecks = [
+                this.results.results.ai_questions_available,
+                this.results.results.ai_content_generated,
+                this.results.results.aigc_resources_loaded
+            ];
+
+            // 計算成功率
+            const allChecks = [...criticalChecks, ...secondaryChecks];
+            const passedChecks = allChecks.filter(Boolean).length;
+            const successRate = (passedChecks / allChecks.length) * 100;
+
+            // 如果所有關鍵檢查都通過且沒有嚴重錯誤，設為 success
+            const allCriticalPassed = criticalChecks.every(Boolean);
+            const hasNoErrors = this.results.errors.length === 0;
+
+            if (allCriticalPassed && successRate >= 50) {
+                // 關鍵檢查通過且成功率 >= 50%，設為 success
+                this.results.status = 'success';
+                console.log(`✅ 狀態更新為 success（成功率: ${successRate.toFixed(0)}%）`);
+            } else {
+                // 否則保持或設為 failed
+                this.results.status = 'failed';
+                console.log(`❌ 狀態設為 failed（成功率: ${successRate.toFixed(0)}%，關鍵檢查: ${allCriticalPassed}）`);
+            }
+        } catch (error) {
+            console.warn('⚠️ 更新最終狀態失敗:', error.message);
         }
     }
 }
