@@ -73,10 +73,13 @@ jobs:
         id: status
         run: |
           DATE_DIR=$(ls -1 reports/${{ matrix.site }} 2>/dev/null | tail -n 1 || echo "")
+          echo "DEBUG: DATE_DIR=$DATE_DIR"
           echo "date_dir=$DATE_DIR" >> $GITHUB_OUTPUT
           RESULTS_FILE=$(ls -1 reports/${{ matrix.site }}/$DATE_DIR/results/*-results.json 2>/dev/null | tail -n 1 || echo "")
+          echo "DEBUG: RESULTS_FILE=$RESULTS_FILE"
           echo "results_file=$RESULTS_FILE" >> $GITHUB_OUTPUT
           STATUS=$(node -e "try{const f=process.env.FILE;if(!f)throw 0;const d=require('fs').readFileSync(f,'utf8');const j=JSON.parse(d);console.log(j.status||'failed');}catch(e){console.log('failed');}" FILE="$RESULTS_FILE")
+          echo "DEBUG: STATUS=$STATUS"
           echo "status=$STATUS" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts (reports)
