@@ -32,13 +32,6 @@ jobs:
       fail-fast: false
       matrix:
         site: [gugu, cmoney, bnext, cnyes, ucar, ucar-motor]
-    outputs:
-      status-gugu: ${{ steps.status.outputs.gugu-status }}
-      status-cmoney: ${{ steps.status.outputs.cmoney-status }}
-      status-bnext: ${{ steps.status.outputs.bnext-status }}
-      status-cnyes: ${{ steps.status.outputs.cnyes-status }}
-      status-ucar: ${{ steps.status.outputs.ucar-status }}
-      status-ucar-motor: ${{ steps.status.outputs.ucar-motor-status }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,8 +76,6 @@ jobs:
           STATUS=$(node -e "try{const f=process.env.FILE;if(!f){console.error('No file provided');throw new Error('No file');}const d=require('fs').readFileSync(f,'utf8');const j=JSON.parse(d);console.log(j.status||'failed');}catch(e){console.error('Error:',e.message);console.log('failed');}" FILE="$RESULTS_FILE")
           echo "DEBUG: STATUS=$STATUS"
           echo "status=$STATUS" >> $GITHUB_OUTPUT
-          # 保存 status 到 job output (使用 site-specific key)
-          echo "${{ matrix.site }}-status=$STATUS" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts (reports)
         if: always()
