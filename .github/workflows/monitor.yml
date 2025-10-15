@@ -3,8 +3,7 @@ name: Multi-Site AIGC Monitor
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'   # 每日 08:00 (Asia/Taipei) -> 00:00 UTC
-    - cron: '0 9 * * *'   # 每日 17:00 (Asia/Taipei) -> 09:00 UTC
+    - cron: '0 * * * *'   # 每小時執行一次 (在每小時的第 0 分鐘)
   push:
     branches:
       - main
