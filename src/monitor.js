@@ -10,6 +10,7 @@ const { checkCMoneyAIGCFunctionality } = require('./cmoney-aigc');
 const { checkBnextAIGCFunctionality, preflightBnext } = require('./bnext-aigc');
 const { checkCnyesAIGCFunctionality } = require('./cnyes-aigc');
 const { checkUcarAIGCFunctionality } = require('./ucar-aigc');
+const { checkUcarMotorAIGCFunctionality } = require('./ucar-motor-aigc');
 const { saveResults } = require('./reporter');
 
 class AIGCMonitor {
@@ -104,6 +105,8 @@ class AIGCMonitor {
                 await checkCnyesAIGCFunctionality(page, context, this.results, config, this.dateFolder, this.timestamp);
             } else if (siteId === 'ucar') {
                 await checkUcarAIGCFunctionality(page, context, this.results, config, this.dateFolder, this.timestamp);
+            } else if (siteId === 'ucar-motor') {
+                await checkUcarMotorAIGCFunctionality(page, context, this.results, config, this.dateFolder, this.timestamp);
             } else {
                 throw new Error(`不支援的站點: ${siteId}`);
             }

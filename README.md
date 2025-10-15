@@ -77,6 +77,9 @@ npm run monitor:cnyes
 # 監控 U-CAR 試車專區
 npm run monitor:ucar
 
+# 監控 U-CAR 機車區
+npm run monitor:ucar-motor
+
 # 監控特定文章頁面
 npm run monitor:gugu-article
 
@@ -85,12 +88,14 @@ npm run monitor:gugu-config
 npm run monitor:cmoney-config
 npm run monitor:cnyes-config
 npm run monitor:ucar-config
+npm run monitor:ucar-motor-config
 
 # 執行示例腳本
 npm run example:gugu
 npm run example:cmoney
 npm run example:cnyes
 npm run example:ucar
+npm run example:ucar-motor
 ```
 
 ### 環境變數
@@ -129,6 +134,7 @@ npm run test:cmoney
 npm run test:bnext
 npm run test:cnyes
 npm run test:ucar
+npm run test:ucar-motor
 
 # 顯示測試報告
 npm run show-report
@@ -175,7 +181,7 @@ npm run show-report
 }
 ```
 
-#### U-CAR 測試流程
+#### U-CAR 試車專區測試流程
 1. 開啟試車報告列表頁 `https://roadtest.u-car.com.tw/roadtest/articles`
 2. 找到『試車報告區塊』並點擊任意文章連結
 3. 確認開啟的文章頁面的 title 與剛剛點擊的連結是符合的
@@ -185,6 +191,17 @@ npm run show-report
 7. 確認『AI Answer』內容有正確載入
 8. 確認『AI Answer』頁面中間是否有『資料來源』的區塊與內容
 9. 確認『AI Answer』頁面中下方，是否有『你想知道哪些？AI來解答』的區塊與內容
+
+#### U-CAR 機車區測試流程 (`ucar-motor`)
+1. 開啟機車文章列表頁 `https://motor.u-car.com.tw/motor/articles`
+2. 找到『機車區塊』並點擊任意文章連結
+3. 確認開啟的文章頁面的 title 與剛剛點擊的連結是符合的
+4. 確認開啟的文章頁面中下方，是否有『你想知道哪些？AI來解答』的區塊與內容
+5. 點擊『你想知道哪些？AI來解答』中任意連結（會開啟新的頁面）
+6. 確認頁面 title 與剛剛點擊的相符
+7. 確認內容有正確載入
+8. 確認 Answer 頁面中間是否有『資料來源』的區塊與內容
+9. 確認 Answer 頁面中下方，是否有『你想知道哪些？AI來解答』的區塊與內容
 
 #### GUGU 站點配置 (`config.gugu.json`)
 
@@ -367,7 +384,8 @@ reports/
 - ✅ **CMoney** (`cmoney`): CMoney 投資網誌 - https://www.cmoney.tw/
 - ✅ **BNext** (`bnext`): 數位時代 - https://www.bnext.com.tw/
 - ✅ **CNYES** (`cnyes`): 鉅亨網 - https://www.cnyes.com/
-- ✅ **U-CAR** (`ucar`): U-CAR 試車專區 - https://roadtest.u-car.com.tw/
+- ✅ **U-CAR 試車專區** (`ucar`): U-CAR 試車報告 - https://roadtest.u-car.com.tw/
+- ✅ **U-CAR 機車區** (`ucar-motor`): U-CAR 機車文章 - https://motor.u-car.com.tw/
 
 #### BNext 注意事項
 - 首頁可能在 30 秒內顯示彈窗，會自動等待並嘗試關閉 `#custom-popup-close`。

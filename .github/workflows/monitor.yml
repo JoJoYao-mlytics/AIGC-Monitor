@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        site: [gugu, cmoney, bnext, cnyes, ucar]
+        site: [gugu, cmoney, bnext, cnyes, ucar, ucar-motor]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
