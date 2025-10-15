@@ -294,18 +294,17 @@ class AIGCMonitor {
             const passedChecks = allChecks.filter(Boolean).length;
             const successRate = (passedChecks / allChecks.length) * 100;
 
-            // 如果所有關鍵檢查都通過且沒有嚴重錯誤，設為 success
+            // 只要所有關鍵檢查都通過，就設為 success
             const allCriticalPassed = criticalChecks.every(Boolean);
-            const hasNoErrors = this.results.errors.length === 0;
 
-            if (allCriticalPassed && successRate >= 50) {
-                // 關鍵檢查通過且成功率 >= 50%，設為 success
+            if (allCriticalPassed) {
+                // 關鍵檢查全部通過，設為 success（即使次要檢查未全過）
                 this.results.status = 'success';
-                console.log(`✅ 狀態更新為 success（成功率: ${successRate.toFixed(0)}%）`);
+                console.log(`✅ 狀態更新為 success（關鍵檢查全過，總成功率: ${successRate.toFixed(0)}%）`);
             } else {
-                // 否則保持或設為 failed
+                // 關鍵檢查未全過，設為 failed
                 this.results.status = 'failed';
-                console.log(`❌ 狀態設為 failed（成功率: ${successRate.toFixed(0)}%，關鍵檢查: ${allCriticalPassed}）`);
+                console.log(`❌ 狀態設為 failed（關鍵檢查未通過，成功率: ${successRate.toFixed(0)}%）`);
             }
         } catch (error) {
             console.warn('⚠️ 更新最終狀態失敗:', error.message);
