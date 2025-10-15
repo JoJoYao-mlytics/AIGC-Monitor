@@ -92,8 +92,8 @@ jobs:
           retention-days: 30
 
 
-      - name: Notify Slack (test - all results)
-        if: always()
+      - name: Notify Slack on issue (failed only)
+        if: ${{ steps.status.outputs.status == 'failed' }}
         env:
           STATUS: ${{ steps.status.outputs.status }}
           DATE_DIR: ${{ steps.status.outputs.date_dir }}
