@@ -2,8 +2,8 @@ name: AIGC Monitor - BNext
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 * * * *'   # 每小時執行一次
+  # schedule:
+  #   - cron: '0 * * * *'   # 每小時執行一次（已暫停）
   push:
     branches:
       - main
