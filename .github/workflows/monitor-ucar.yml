@@ -1,0 +1,166 @@
+name: AIGC Monitor - U-CAR
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *'   # 每小時執行一次
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'config.ucar.json'
+      - 'playwright.config.js'
+      - 'package.json'
+      - '.github/workflows/monitor-ucar.yml'
+
+jobs:
+  test-ucar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEBUG: 'false'
+      CI: 'true'
+      SITE_ID: 'ucar'
+      PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      CLEAR_ON_START: 'false'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install npm dependencies
+        run: npm ci --no-audit --no-fund || npm i --no-audit --no-fund
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run AIGC Monitor
+        id: run_test
+        continue-on-error: true
+        run: node src/monitor.js
+
+      - name: Check test results
+        id: check_results
+        run: |
+          sleep 2
+          DATE_DIR=$(ls -1 reports/ucar 2>/dev/null | tail -n 1 || echo "")
+          RESULTS_FILE=$(ls -1 reports/ucar/$DATE_DIR/results/*-results.json 2>/dev/null | tail -n 1 || echo "")
+
+          if [ -z "$RESULTS_FILE" ] || [ ! -f "$RESULTS_FILE" ]; then
+            echo "status=failed" >> $GITHUB_OUTPUT
+            echo "message=No results file found" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          STATUS=$(jq -r '.status' "$RESULTS_FILE")
+          CHECKS=$(jq -r '[.results | to_entries[] | select(.value == true)] | length' "$RESULTS_FILE")
+          TOTAL_CHECKS=$(jq -r '.results | length' "$RESULTS_FILE")
+          ERRORS=$(jq -r '.errors | length' "$RESULTS_FILE")
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "checks=$CHECKS/$TOTAL_CHECKS" >> $GITHUB_OUTPUT
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "results_file=$RESULTS_FILE" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ucar-aigc-reports-${{ github.run_number }}
+          path: |
+            reports/ucar/**
+            screenshots/ucar/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Notify Slack on failure
+        if: steps.check_results.outputs.status == 'failed'
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "No Slack webhook configured"
+            exit 0
+          fi
+
+          RESULTS_FILE="${{ steps.check_results.outputs.results_file }}"
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          CHECKS="${{ steps.check_results.outputs.checks }}"
+          ERRORS="${{ steps.check_results.outputs.errors }}"
+
+          # 提取網路資訊
+          NETWORK_INFO=""
+          if [ -f "$RESULTS_FILE" ]; then
+            API_COUNT=$(jq -r '.api_requests | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+            FAILED_API=$(jq -r '[.api_requests[] | select(.status >= 400)] | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+            AVG_RESPONSE=$(jq -r '.performance.api_avg_response_ms // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+
+            NETWORK_INFO="API Requests: ${API_COUNT} (${FAILED_API} failed)\\nAvg Response: ${AVG_RESPONSE}ms"
+
+            # 獲取失敗的 API 詳情
+            FAILED_APIS=$(jq -r '[.api_requests[] | select(.status >= 400) | "- " + .method + " " + .url + " (" + (.status|tostring) + ")"] | join("\\n")' "$RESULTS_FILE" 2>/dev/null || echo "")
+            if [ -n "$FAILED_APIS" ]; then
+              NETWORK_INFO="${NETWORK_INFO}\\n\\nFailed APIs:\\n${FAILED_APIS}"
+            fi
+
+            # 獲取錯誤訊息
+            ERROR_MESSAGES=$(jq -r '[.errors[] | .message] | join("\\n")' "$RESULTS_FILE" 2>/dev/null || echo "")
+
+            # 獲取截圖連結
+            ARTIFACT_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}#artifacts"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg site "U-CAR" \
+            --arg checks "$CHECKS" \
+            --arg errors "$ERRORS" \
+            --arg run_url "$RUN_URL" \
+            --arg network "$NETWORK_INFO" \
+            --arg error_msgs "$ERROR_MESSAGES" \
+            --arg artifact_url "$ARTIFACT_URL" \
+            '{
+              text: ("AIGC Monitor [" + $site + "]: Failed ❌"),
+              attachments: [
+                {
+                  color: "danger",
+                  title: ($site + " AIGC Test Failed"),
+                  title_link: $run_url,
+                  fields: [
+                    {
+                      title: "Test Results",
+                      value: ($checks + " checks passed\n" + $errors + " errors"),
+                      short: true
+                    },
+                    {
+                      title: "Screenshots & Reports",
+                      value: ("<" + $artifact_url + "|Download Artifacts>"),
+                      short: true
+                    },
+                    {
+                      title: "Network Status",
+                      value: $network,
+                      short: false
+                    },
+                    {
+                      title: "Error Details",
+                      value: (if $error_msgs != "" then $error_msgs else "No error messages" end),
+                      short: false
+                    }
+                  ],
+                  footer: "AIGC Monitor",
+                  ts: (now | floor)
+                }
+              ]
+            }')
+
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL" || true
