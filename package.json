@@ -12,9 +12,7 @@
     "test:ucar-news": "playwright test tests/sites/ucar-news.spec.ts",
     "test:ucar-motor": "playwright test tests/sites/ucar-motor.spec.ts",
     "test:ucar-am": "playwright test tests/sites/ucar-am.spec.ts",
-    "report": "playwright show-report",
-    "monitor": "ts-node scripts/monitor.ts",
-    "test-slack": "ts-node scripts/test-slack.ts"
+    "report": "playwright show-report"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.2",
