@@ -1,0 +1,25 @@
+{
+  "name": "@aigc-monitor/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:bnext": "playwright test tests/sites/bnext.spec.ts",
+    "test:cnyes": "playwright test tests/sites/cnyes.spec.ts",
+    "test:cmoney": "playwright test tests/sites/cmoney.spec.ts",
+    "test:ucar": "playwright test tests/sites/ucar.spec.ts",
+    "test:ucar-news": "playwright test tests/sites/ucar-news.spec.ts",
+    "test:ucar-motor": "playwright test tests/sites/ucar-motor.spec.ts",
+    "test:ucar-am": "playwright test tests/sites/ucar-am.spec.ts",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.2",
+    "dotenv": "^16.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
+
+
