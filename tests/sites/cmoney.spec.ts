@@ -128,9 +128,14 @@ test.describe('cmoney.tw AIGC verification', () => {
 
     console.log('\n📍 步驟 6: 尋找「你可能想知道」區塊');
     // 5) 確認文章頁面裡有「你可能想知道」區塊
-    const aigcSection = page.getByText(/你可能想知道|你想知道哪些/).first();
+    // 使用正確的 class 選擇器（可能有多個，取第一個）
+    const aigcSection = page.locator('h2.question-title').first();
     await expect(aigcSection).toBeVisible({ timeout: 15000 });
     console.log('✅ 找到 AIGC 區塊');
+    
+    // 確認文字內容
+    const aigcText = await aigcSection.textContent();
+    console.log(`   AIGC 區塊標題: "${aigcText}"`);
     
     await testInfo.attach('03-aigc-section-found.png', { 
       body: await page.screenshot({ fullPage: false }), 
@@ -197,61 +202,25 @@ test.describe('cmoney.tw AIGC verification', () => {
 
     console.log('\n📍 步驟 10: 驗證「資料來源」區塊');
     // 8) 確認 Answer 頁面有「資料來源」區塊
-    const dataSourceSection = answerPage.getByText(/資料來源|Data Source/i).first();
-    let dataSourceFound = (await dataSourceSection.count()) > 0;
-    
-    // 如果主頁面找不到，嘗試在 iframe 中尋找
-    if (!dataSourceFound) {
-      const frames = answerPage.frames();
-      for (const frame of frames) {
-        const frameUrl = frame.url();
-        if (frameUrl.includes('aigc') || frameUrl.includes('cmoney')) {
-          dataSourceFound = (await frame.getByText(/資料來源|Data Source/i).count()) > 0;
-          if (dataSourceFound) {
-            console.log('✅ 在 iframe 中找到資料來源區塊');
-            break;
-          }
-        }
-      }
-    } else {
-      console.log('✅ 在主頁面找到資料來源區塊');
-    }
-
-    expect(dataSourceFound).toBeTruthy();
+    // 使用正確的 id 選擇器
+    const dataSourceSection = answerPage.locator('#source_area');
+    await expect(dataSourceSection).toBeVisible({ timeout: 10000 });
+    console.log('✅ 找到資料來源區塊 (#source_area)');
     
     await testInfo.attach('06-data-source-section.png', { 
       body: await answerPage.screenshot({ fullPage: false }), 
       contentType: 'image/png' 
     });
 
-    console.log('\n📍 步驟 11: 驗證底部「你可能想知道」或 AI 相關區塊');
-    // 9) 確認 Answer 頁面底部有「你可能想知道」或其他 AIGC 推薦區塊
+    console.log('\n📍 步驟 11: 驗證底部「你想知道哪些？AI來解答」區塊');
+    // 9) 確認 Answer 頁面底部有「你想知道哪些？AI來解答」區塊
     await answerPage.mouse.wheel(0, 1500);
     await answerPage.waitForTimeout(1000);
     
-    let aiRecommendSection = false;
-    // 匹配多種可能的文字
-    const aiSectionLocator = answerPage.getByText(/你可能想知道|你想知道哪些|AI來解答|AI生成|相關問題/).first();
-    aiRecommendSection = (await aiSectionLocator.count()) > 0;
-
-    // 如果主頁面找不到，嘗試在 iframe 中尋找
-    if (!aiRecommendSection) {
-      const frames = answerPage.frames();
-      for (const frame of frames) {
-        const frameUrl = frame.url();
-        if (frameUrl.includes('aigc') || frameUrl.includes('cmoney')) {
-          aiRecommendSection = (await frame.getByText(/你可能想知道|你想知道哪些|AI來解答|AI生成|相關問題/).count()) > 0;
-          if (aiRecommendSection) {
-            console.log('✅ 在 iframe 中找到 AI 推薦區塊');
-            break;
-          }
-        }
-      }
-    } else {
-      console.log('✅ 在主頁面找到 AI 推薦區塊');
-    }
-
-    expect(aiRecommendSection).toBeTruthy();
+    // 使用正確的 id 選擇器
+    const questionArea = answerPage.locator('#question_area');
+    await expect(questionArea).toBeVisible({ timeout: 10000 });
+    console.log('✅ 找到 AI 推薦區塊 (#question_area)');
     
     await testInfo.attach('07-bottom-aigc-section.png', { 
       body: await answerPage.screenshot({ fullPage: false }), 
