@@ -7,8 +7,7 @@ dist/
 logs/
 *.log
 
-# Local monitoring system (不推送到 GitHub)
-scripts/
+# Local monitoring documentation (不推送到 GitHub)
 MONITOR_README.md
 QUICK_START_MONITOR.md
 ENV_SETUP.md
