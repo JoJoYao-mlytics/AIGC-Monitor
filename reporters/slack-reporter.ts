@@ -68,8 +68,12 @@ class SlackReporter implements Reporter {
 
   async onEnd() {
     if (!this.webhook || !this.enabled) return;
+    
+    // 只在有失败時發送總結，成功時不發送（避免每次測試都發送通知）
+    if (this.failed === 0) return;
+    
     const durationSec = Math.max(1, Math.round((Date.now() - this.startedAtMs) / 1000));
-    const statusText = this.failed === 0 ? '✅ All Passed' : '⚠️ Completed with Failures';
+    const statusText = '⚠️ Completed with Failures';
     const reportUrl = process.env.PLAYWRIGHT_REPORT_URL; // optional CI artifact URL
     const reportDir = process.env.PLAYWRIGHT_REPORT_DIR || 'playwright-report';
 
@@ -83,7 +87,7 @@ class SlackReporter implements Reporter {
     ];
 
     const blocks: any[] = [
-      { type: 'header', text: { type: 'plain_text', text: `Playwright E2E Summary` } },
+      { type: 'header', text: { type: 'plain_text', text: `⚠️ Playwright Test Summary - Failures Detected` } },
       { type: 'section', text: { type: 'mrkdwn', text: `*Status*: ${statusText}` } },
       { type: 'section', text: { type: 'mrkdwn', text: lines.join('\n') } },
     ];
@@ -94,7 +98,7 @@ class SlackReporter implements Reporter {
       blocks.push({ type: 'section', text: { type: 'mrkdwn', text: `*Report directory*: \`${reportDir}\`` } });
     }
 
-    const summary = { text: 'Playwright E2E Summary', blocks };
+    const summary = { text: '⚠️ Playwright Test Failures', blocks };
     try {
       await postToSlack(this.webhook, summary);
     } catch {
