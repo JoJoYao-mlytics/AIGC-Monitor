@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { SITE_CONFIGS } from '../helpers/site-configs';
 import {
   navigateToArticle,
@@ -13,16 +13,25 @@ import {
   attachNetworkLog,
 } from '../helpers/network-monitor';
 
-const config = SITE_CONFIGS.find((c) => c.name === 'cmoney')!;
+const config = SITE_CONFIGS.find((c) => c.name === 'gvm')!;
 
 test.describe(`${config.displayName} AIGC verification`, () => {
-  test('End-to-end flow: Article -> Widget -> Answer', async ({ context, page }, testInfo) => {
+  test('End-to-end flow: Article -> Widget -> Answer (iframe)', async ({ context, page }, testInfo) => {
     const records = attachNetworkMonitor(context, /mlytics\.com|aigc/);
+
     await navigateToArticle(page, config);
     const { answerPage } = await findAndClickAigcQuestion(page, context, config);
-    const target = getAnswerFrame(answerPage, config) ?? answerPage;
-    await waitForAnswerReady(target, config);
-    await assertAnswerSections(target, config);
+
+    await answerPage.waitForLoadState('domcontentloaded');
+    const frame = getAnswerFrame(answerPage, config);
+    if (!frame) throw new Error('GVM iframe not found — check iframePattern in site-configs.ts');
+
+    await waitForAnswerReady(frame, config);
+    await assertAnswerSections(frame, config);
+
+    // GVM 額外驗證：「觀看原始文章」CTA
+    await expect(answerPage.locator('a[href*="returnarticle"]').first()).toBeVisible({ timeout: 5_000 });
+
     for (const pattern of config.apiUrlPatterns) assertApiStatus(records, pattern);
     await attachNetworkLog(records, testInfo);
   });
