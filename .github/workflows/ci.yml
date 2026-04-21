@@ -1,47 +1,57 @@
-name: E2E - Playwright
+name: AIGC Monitor
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '*/10 * * * *'   # smoke：每 10 分鐘
+    - cron: '0 * * * *'      # full monitor：每小時整點
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  smoke:
+    if: >
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event.schedule == '*/10 * * * *'
+    runs-on: runner-amd64
+    timeout-minutes: 10
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install dependencies
-        run: |
-          cd AIGC-Monitor
-          npm ci
-
-      - name: Install Playwright browsers
-        run: |
-          cd AIGC-Monitor
-          npx playwright install --with-deps chromium
-
-      - name: Run tests
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run smoke tests
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          cd AIGC-Monitor
-          npm test -- --reporter=list,html,./reporters/slack-reporter.ts
+        run: npx playwright test tests/smoke/ --reporter=list,./reporters/slack-reporter.ts
 
-      - name: Upload HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
+  monitor:
+    if: github.event.schedule == '0 * * * *'
+    runs-on: runner-amd64
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: playwright-report
-          path: AIGC-Monitor/playwright-report
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run full monitor tests
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PLAYWRIGHT_REPORT_URL: ${{ vars.PLAYWRIGHT_REPORT_URL }}
+        run: npm test -- --reporter=list,html,./reporters/slack-reporter.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
           retention-days: 7
-
-
