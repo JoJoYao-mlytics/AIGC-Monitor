@@ -5,6 +5,7 @@ dotenv.config();
 
 export default defineConfig({
   testDir: './tests',
+  testMatch: ['**/*.spec.ts', '**/*.smoke.ts'],
   timeout: 60_000,
   expect: {
     timeout: 10_000,
