@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
+    "test": "playwright test tests/sites/",
+    "test:smoke": "playwright test tests/smoke/",
+    "test:gvm": "playwright test tests/sites/gvm.spec.ts",
     "test:bnext": "playwright test tests/sites/bnext.spec.ts",
     "test:cnyes": "playwright test tests/sites/cnyes.spec.ts",
     "test:cmoney": "playwright test tests/sites/cmoney.spec.ts",
@@ -12,6 +13,7 @@
     "test:ucar-news": "playwright test tests/sites/ucar-news.spec.ts",
     "test:ucar-motor": "playwright test tests/sites/ucar-motor.spec.ts",
     "test:ucar-am": "playwright test tests/sites/ucar-am.spec.ts",
+    "test:ui": "playwright test --ui",
     "report": "playwright show-report"
   },
   "devDependencies": {
